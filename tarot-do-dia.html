@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tarot do Dia — Sorteie sua carta</title>
+  <style>
+    /* Reset simples */
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: linear-gradient(180deg,#f6f7fb,#ffffff); color:#222; line-height:1.4}
+    header{padding:20px; display:flex; align-items:center; gap:16px; border-bottom:1px solid rgba(0,0,0,.05); background:white}
+    .logo{font-weight:700; color:#0b5; letter-spacing:.5px}
+    .container{max-width:980px;margin:28px auto;padding:16px}
+    .hero{display:flex; gap:24px; align-items:center; flex-wrap:wrap}
+    .intro{flex:1 1 320px}
+    h1{font-size:1.6rem; margin-bottom:8px}
+    p.lead{color:#444;margin-bottom:12px}
+    .action{margin-top:12px}
+    button.primary{background:#5b3be8;color:white;border:0;padding:12px 18px;border-radius:10px;font-weight:600;cursor:pointer;box-shadow:0 6px 18px rgba(91,59,232,.15)}
+    button.secondary{background:transparent;border:1px solid #ddd;padding:10px 14px;border-radius:8px;cursor:pointer}
+    /* área do baralho / resultado */
+    .deck-area{flex:1 1 300px; display:flex; flex-direction:column; align-items:center; gap:12px}
+    .card-stack{width:220px;height:320px; perspective:1200px; position:relative}
+    .card{width:100%;height:100%; position:absolute; border-radius:12px; background:#111; color:white; display:flex; align-items:center; justify-content:center; font-size:1.1rem; user-select:none; transform-style:preserve-3d; transition: transform .9s cubic-bezier(.2,.9,.3,1), opacity .4s}
+    .card.back{background-image:linear-gradient(135deg,#2b2b2b,#1a1a1a); box-shadow:0 18px 40px rgba(0,0,0,.28)}
+    .card.front{transform:rotateY(180deg); overflow:hidden}
+    .card .face{position:absolute; inset:0; backface-visibility:hidden; display:flex; align-items:center; justify-content:center}
+    .card .front-face{transform:rotateY(180deg); background:white; color:#111; padding:14px; flex-direction:column; gap:8px}
+    .card img{width:100%;height:100%;object-fit:cover;border-radius:12px}
+    .flipped{transform:rotateY(180deg)}
+    .meta{margin-top:14px; text-align:center}
+    .result{background:white;border-radius:12px;padding:14px;box-shadow:0 8px 30px rgba(20,20,60,.06); margin-top:18px}
+    .result h2{font-size:1.1rem;margin-bottom:8px}
+    .meaning{color:#333}
+    footer{margin-top:28px;padding:20px;text-align:center;color:#666;font-size:.9rem}
+    /* responsivo */
+    @media (max-width:720px){
+      .hero{flex-direction:column}
+      .card-stack{width:180px;height:260px}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Tarot do Dia (Demo)</div>
+    <nav style="margin-left:auto;display:flex;gap:10px;align-items:center">
+      <a href="#" style="color:#666;text-decoration:none;font-size:.95rem">Home</a>
+      <a href="#" style="color:#666;text-decoration:none;font-size:.95rem">Sobre</a>
+      <a href="#" style="color:#666;text-decoration:none;font-size:.95rem">Contato</a>
+    </nav>
+  </header>
+
+  <main class="container" role="main">
+    <section class="hero" aria-labelledby="titulo">
+      <div class="intro">
+        <h1 id="titulo">Tarot do Dia</h1>
+        <p class="lead">Concentre-se por um momento, respire fundo e clique em "Sortear carta". Você poderá tirar <strong>apenas uma carta por dia</strong>. A carta traz uma orientação para as próximas 24 horas.</p>
+        <div class="action">
+          <button id="sortearBtn" class="primary">Sortear as cartas</button>
+          <button id="resetBtn" class="secondary" title="Limpar sorteio do dia" style="margin-left:10px">Limpar</button>
+        </div>
+        <p style="margin-top:10px;color:#666;font-size:.92rem">Dica: mentalize sua intenção para o dia antes de sortear.</p>
+      </div>
+
+      <div class="deck-area" aria-live="polite">
+        <div class="card-stack" id="cardStack" aria-hidden="false">
+          <!-- cartão com face e verso (ilustração) -->
+          <div class="card back" id="cardBack" role="img" aria-label="Costas das cartas">
+            <div class="face back-face" style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+              <div style="font-size:1.05rem">✨</div>
+              <div style="font-size:.85rem;margin-top:6px">Tarot</div>
+            </div>
+          </div>
+
+          <div class="card front" id="cardFront" aria-hidden="true" style="opacity:0">
+            <div class="face front-face" id="frontFace">
+              <!-- Aqui entra imagem + título + subtítulo -->
+              <img id="cardImage" alt="" src="" style="border-radius:10px;width:100%;height:70%;object-fit:cover">
+              <div style="padding-top:8px;width:100%;text-align:left">
+                <div id="cardTitle" style="font-weight:700"></div>
+                <div id="cardSuit" style="font-size:.92rem;color:#6b6b6b"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="meta">
+          <div id="statusText" style="color:#666">Ainda não sorteou a carta de hoje.</div>
+        </div>
+
+        <div id="resultBox" class="result" style="display:none" aria-live="polite">
+          <h2 id="resultTitle">Conselho do dia</h2>
+          <p id="meaningText" class="meaning"></p>
+        </div>
+      </div>
+    </section>
+
+    <section style="margin-top:26px">
+      <h3>Como funciona</h3>
+      <p style="color:#555; margin-top:8px">Este é um jogo de orientação. Ao sortear, o sistema escolhe uma carta aleatória e mostra um significado e uma sugestão prática para o seu dia. A implementação abaixo guarda localmente a carta sorteada para que você possa ver sempre a mesma carta até o próximo dia.</p>
+    </section>
+  </main>
+
+  <footer>
+    Demo criada por você — personalize imagens e textos como quiser.
+  </footer>
+
+  <script>
+    /* ----- Dados do baralho (exemplo) -----
+       Substitua as imagens por suas imagens reais.
+       Estrutura: id, title, suit, img, meaning
+    */
+    const deck = [
+      {id:1, title:'O Mago', suit:'Arcano Maior', img:'images/cards/mago.jpg', meaning:'Aproveite as oportunidades de hoje: talento e recursos estão alinhados. Aja com foco.'},
+      {id:2, title:'A Sacerdotisa', suit:'Arcano Maior', img:'images/cards/sacerdotisa.jpg', meaning:'Ouça sua intuição. Hoje é dia de reflexão e silêncio produtivo.'},
+      {id:3, title:'A Imperatriz', suit:'Arcano Maior', img:'images/cards/imperatriz.jpg', meaning:'Crie ambiente de cuidado: fertilize projetos e relacionamentos.'},
+      {id:4, title:'A Torre', suit:'Arcano Maior', img:'images/cards/torre.jpg', meaning:'Mudanças súbitas podem abrir espaço para algo melhor. Permaneça flexível.'},
+      {id:5, title:'O Sol', suit:'Arcano Maior', img:'images/cards/sol.jpg', meaning:'Energia favorável, clareza e alegria — aproveite com gratidão.'},
+      // adicione até 78 cartas conforme desejar
+    ];
+
+    // seleciona elementos
+    const sortearBtn = document.getElementById('sortearBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const cardBack = document.getElementById('cardBack');
+    const cardFront = document.getElementById('cardFront');
+    const cardImage = document.getElementById('cardImage');
+    const cardTitle = document.getElementById('cardTitle');
+    const cardSuit = document.getElementById('cardSuit');
+    const frontFace = document.getElementById('frontFace');
+    const statusText = document.getElementById('statusText');
+    const resultBox = document.getElementById('resultBox');
+    const meaningText = document.getElementById('meaningText');
+
+    // util: get string yyyy-mm-dd
+    function todayKey() {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,'0');
+      const dd = String(d.getDate()).padStart(2,'0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    // guarda a carta sorteada localStorage por data
+    const STORAGE_KEY = 'tarotDoDia_selected';
+
+    function getSaved() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(!raw) return null;
+        const parsed = JSON.parse(raw);
+        if(parsed && parsed.date === todayKey()) return parsed.cardId;
+        return null;
+      } catch (e) {
+        console.error(e);
+        return null;
+      }
+    }
+
+    function saveSelected(cardId) {
+      const payload = { date: todayKey(), cardId };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    }
+
+    function clearSaved() {
+      localStorage.removeItem(STORAGE_KEY);
+      updateUIForNoSelection();
+    }
+
+    // atualiza UI quando não há sorteio
+    function updateUIForNoSelection() {
+      // voltar para costas
+      cardFront.style.opacity = 0;
+      cardFront.classList.remove('flipped');
+      cardBack.classList.remove('flipped');
+      cardBack.style.opacity = 1;
+      statusText.textContent = 'Ainda não sorteou a carta de hoje.';
+      resultBox.style.display = 'none';
+    }
+
+    // mostra resultado salvo
+    function showCardById(cardId) {
+      const c = deck.find(x=>x.id===cardId);
+      if(!c) { updateUIForNoSelection(); return; }
+      // preenche front
+      cardImage.src = c.img;
+      cardImage.alt = c.title;
+      cardTitle.textContent = c.title;
+      cardSuit.textContent = c.suit;
+      meaningText.textContent = c.meaning;
+      // anima virada
+      cardBack.classList.add('flipped');
+      cardFront.classList.add('flipped');
+      cardFront.style.opacity = 1;
+      statusText.textContent = `Carta sorteada hoje: ${c.title}`;
+      resultBox.style.display = 'block';
+    }
+
+    // sorteio aleatório simples
+    function drawRandomCard() {
+      const idx = Math.floor(Math.random() * deck.length);
+      return deck[idx].id;
+    }
+
+    // anima flip com delay
+    function animateDraw(cardId) {
+      // anima: empurrar costas para cima, mostrar frente depois de .7s
+      cardBack.style.transition = 'transform .9s cubic-bezier(.2,.9,.3,1)';
+      cardFront.style.transition = 'transform .9s cubic-bezier(.2,.9,.3,1), opacity .6s';
+      // começar flip
+      cardBack.classList.add('flipped');
+      // mostrar frente depois de 700ms
+      setTimeout(() => {
+        showCardById(cardId);
+      }, 700);
+    }
+
+    // gerenciar evento de sortear
+    sortearBtn.addEventListener('click', () => {
+      const existing = getSaved();
+      if(existing) {
+        // já sorteou hoje — mostrar modal / feedback
+        showCardById(existing);
+        // opcional: breve vibração (onde suportado)
+        if(navigator.vibrate) navigator.vibrate(50);
+        return;
+      }
+      // sorteia
+      const chosenId = drawRandomCard();
+      saveSelected(chosenId);
+      animateDraw(chosenId);
+    });
+
+    resetBtn.addEventListener('click', () => {
+      if(confirm('Deseja realmente limpar o sorteio do dia?')) {
+        clearSaved();
+      }
+    });
+
+    // Ao carregar, se já sorteou hoje, exibe
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = getSaved();
+      if(saved) {
+        showCardById(saved);
+      } else {
+        updateUIForNoSelection();
+      }
+    });
+
+    /* ----- Observações de personalização -----
+       1) Substitua 'deck' por uma lista completa com até 78 cartas.
+       2) Coloque imagens em /images/cards/*.jpg ou altere 'img' para URLs absolutos.
+       3) Você pode estender o significado para incluir 'conselho', 'amor', 'carreira', etc.
+       4) Para lógica de "uma por dia" mais rígida (por ex. contando por UTC), ajuste todayKey().
+       5) Integração com backend: envie o resultado para servidor ao sortear (fetch POST) — se desejar, eu acrescento.
+    */
+  </script>
+</body>
+</html>
