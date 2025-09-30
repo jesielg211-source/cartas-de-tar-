@@ -1,348 +1,155 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Tarot do Dia — Sorteie sua carta</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tarô do Dia</title>
   <style>
-    /* Reset simples */
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: linear-gradient(180deg,#f6f7fb,#ffffff); color:#222; line-height:1.4}
-    header{padding:20px; display:flex; align-items:center; gap:16px; border-bottom:1px solid rgba(0,0,0,.05); background:white}
-    .logo{font-weight:700; color:#0b5; letter-spacing:.5px}
-    .container{max-width:980px;margin:28px auto;padding:16px}
-    .hero{display:flex; gap:24px; align-items:center; flex-wrap:wrap}
-    .intro{flex:1 1 320px}
-    h1{font-size:1.6rem; margin-bottom:8px}
-    p.lead{color:#444;margin-bottom:12px}
-    .action{margin-top:12px}
-    button.primary{background:#5b3be8;color:white;border:0;padding:12px 18px;border-radius:10px;font-weight:600;cursor:pointer;box-shadow:0 6px 18px rgba(91,59,232,.15)}
-    button.secondary{background:transparent;border:1px solid #ddd;padding:10px 14px;border-radius:8px;cursor:pointer}
-    /* área do baralho / resultado */
-    .deck-area{flex:1 1 300px; display:flex; flex-direction:column; align-items:center; gap:12px}
-    .card-stack{width:220px;height:320px; perspective:1200px; position:relative}
-    .card{width:100%;height:100%; position:absolute; border-radius:12px; background:#111; color:white; display:flex; align-items:center; justify-content:center; font-size:1.1rem; user-select:none; transition:transform .9s cubic-bezier(.2,.9,.3,1), opacity .6s}
-    .card.back{background-image:linear-gradient(135deg,#2b2b2b,#1a1a1a); box-shadow:0 18px 40px rgba(0,0,0,.28)}
-    .card.front{transform:rotateY(180deg); overflow:hidden}
-    .card .face{position:absolute; inset:0; backface-visibility:hidden; display:flex; align-items:center; justify-content:center}
-    .card .front-face{transform:rotateY(180deg); background:white; color:#111; padding:14px; flex-direction:column; gap:8px}
-    .card img{width:100%;height:100%;object-fit:cover;border-radius:12px}
-    .flipped{transform:rotateY(180deg)}
-    .meta{margin-top:14px; text-align:center}
-    .result{background:white;border-radius:12px;padding:14px;box-shadow:0 8px 30px rgba(20,20,60,.06); margin-top:18px}
-    .result h2{font-size:1.1rem;margin-bottom:8px}
-    .meaning{color:#333}
-    footer{margin-top:28px;padding:20px;text-align:center;color:#666;font-size:.9rem}
-    /* responsivo */
-    @media (max-width:720px){
-      .hero{flex-direction:column}
-      .card-stack{width:180px;height:260px}
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #1a1a1a;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #ffcc00;
+    }
+    #cardBox {
+      margin: 20px auto;
+      max-width: 300px;
+    }
+    #cardBox img {
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.6);
+    }
+    #status {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    #description {
+      margin-top: 10px;
+      font-size: 16px;
+      line-height: 1.4;
+      color: #ddd;
+    }
+    .btn {
+      display: inline-block;
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .btn-primary {
+      background: #ffcc00;
+      color: #000;
+    }
+    .btn-primary:hover {
+      background: #e6b800;
+    }
+    .btn-secondary {
+      background: #444;
+      color: #fff;
+    }
+    .btn-secondary:hover {
+      background: #666;
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="logo">Tarot do Dia (Demo)</div>
-    <nav style="margin-left:auto;display:flex;gap:10px;align-items:center">
-      <a href="#" style="color:#666;text-decoration:none;font-size:.95rem">Home</a>
-      <a href="#" style="color:#666;text-decoration:none;font-size:.95rem">Sobre</a>
-      <a href="#" style="color:#666;text-decoration:none;font-size:.95rem">Contato</a>
-    </nav>
-  </header>
+  <h1>✨ Tarô do Dia ✨</h1>
 
-  <main class="container" role="main">
-    <section class="hero" aria-labelledby="titulo">
-      <div class="intro">
-        <h1 id="titulo">Tarot do Dia</h1>
-        <p class="lead">Concentre-se por um momento, respire fundo e clique em "Sortear carta". Você poderá tirar <strong>apenas uma carta por dia</strong>. A carta traz uma orientação para as próximas 24h.</p>
-        <div class="action">
-          <button id="sortearBtn" class="primary">Sortear as cartas</button>
-          <button id="resetBtn" class="secondary" title="Limpar sorteio do dia" style="margin-left:10px">Limpar</button>
-        </div>
-        <p style="margin-top:10px;color:#666;font-size:.92rem">Dica: mentalize sua intenção para o dia antes de sortear.</p>
-      </div>
+  <div id="resultBox" style="display:none;">
+    <div id="cardBox">
+      <img id="cardImage" src="" alt="Carta do Dia">
+    </div>
+    <div id="status"></div>
+    <div id="description"></div>
+  </div>
 
-      <div class="deck-area" aria-live="polite">
-        <div class="card-stack" id="cardStack" aria-hidden="false">
-          <!-- cartão com face e verso (ilustração) -->
-          <div class="card back" id="cardBack" role="img" aria-label="Costas das cartas">
-            <div class="face back-face" style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-              <div style="font-size:1.05rem">✨</div>
-              <div style="font-size:.85rem;margin-top:6px">Tarot</div>
-            </div>
-          </div>
-
-          <div class="card front" id="cardFront" aria-hidden="true" style="opacity:0">
-            <div class="face front-face" id="frontFace">
-              <!-- Aqui entra imagem + título + subtítulo -->
-              <img id="cardImage" alt="" src="" style="border-radius:10px;width:100%;height:70%;object-fit:cover">
-              <div style="padding-top:8px;width:100%;text-align:left">
-                <div id="cardTitle" style="font-weight:700"></div>
-                <div id="cardSuit" style="font-size:.92rem;color:#6b6b6b"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="meta">
-          <div id="statusText" style="color:#666">Ainda não sorteou a carta de hoje.</div>
-        </div>
-
-        <div id="resultBox" class="result" style="display:none" aria-live="polite">
-          <h2 id="resultTitle">Conselho do dia</h2>
-          <p id="meaningText" class="meaning"></p>
-        </div>
-      </div>
-    </section>
-
-    <section style="margin-top:26px">
-      <h3>Como funciona</h3>
-      <p style="color:#555; margin-top:8px">Este é um jogo de orientação. Ao sortear, o sistema escolhe uma carta aleatória e mostra um significado e uma sugestão prática para o seu dia. A implementação não tem viés místico, é apenas para diversão e reflexão! Personalize os textos e imagens como quiser.</p>
-    </section>
-  </main>
-
-  <footer>
-    Demo criada por você — personalize imagens e textos como quiser.
-  </footer>
+  <button id="sortearBtn" class="btn btn-primary">Sortear Carta</button>
+  <button id="resetBtn" class="btn btn-secondary">Limpar</button>
 
   <script>
-    // Baralho completo com 78 cartas
+    // === Baralho (adicione todas as 78 cartas aqui) ===
     const deck = [
-      // Arcanos Maiores
-      {id:1,title:'O Louco',suit:'Arcano Maior',img:'images/cards/louco.jpg',meaning:'Novos começos, espontaneidade, liberdade. É hora de seguir sua intuição e abraçar o desconhecido com confiança.'},
-      {id:2,title:'O Mago',suit:'Arcano Maior',img:'images/cards/mago.jpg',meaning:'Aproveite as oportunidades: talento e recursos estão alinhados. Use suas habilidades para manifestar seus desejos.'},
-      {id:3,title:'A Sacerdotisa',suit:'Arcano Maior',img:'images/cards/sacerdotisa.jpg',meaning:'Intuição, sabedoria interior. Confie nos seus instintos e busque conhecimento espiritual.'},
-      {id:4,title:'A Imperatriz',suit:'Arcano Maior',img:'images/cards/imperatriz.jpg',meaning:'Fertilidade, criatividade, abundância. Nutra seus projetos e expresse sua sensibilidade.'},
-      {id:5,title:'O Imperador',suit:'Arcano Maior',img:'images/cards/imperador.jpg',meaning:'Autoridade, estrutura, controle. Estabeleça limites e tome decisões com confiança.'},
-      {id:6,title:'O Hierofante',suit:'Arcano Maior',img:'images/cards/hierofante.jpg',meaning:'Tradição, espiritualidade, ensino. Busque orientação em valores consolidados.'},
-      {id:7,title:'Os Enamorados',suit:'Arcano Maior',img:'images/cards/enamorados.jpg',meaning:'Escolhas, relacionamentos, harmonia. Decisões importantes baseadas no coração.'},
-      {id:8,title:'O Carro',suit:'Arcano Maior',img:'images/cards/carro.jpg',meaning:'Vitória, progresso, autocontrole. Avance com determinação superando obstáculos.'},
-      {id:9,title:'A Força',suit:'Arcano Maior',img:'images/cards/forca.jpg',meaning:'Coragem, paciência, compaixão. Use a força interior para dominar desafios.'},
-      {id:10,title:'O Eremita',suit:'Arcano Maior',img:'images/cards/eremita.jpg',meaning:'Introspecção, sabedoria, solidão. Momento de reflexão para encontrar respostas internas.'},
-      {id:11,title:'A Roda da Fortuna',suit:'Arcano Maior',img:'images/cards/roda_fortuna.jpg',meaning:'Ciclos, mudança, destino. Aceite as transformações naturais da vida.'},
-      {id:12,title:'A Justiça',suit:'Arcano Maior',img:'images/cards/justica.jpg',meaning:'Equilíbrio, verdade, karma. Suas ações terão consequências justas.'},
-      {id:13,title:'O Enforcado',suit:'Arcano Maior',img:'images/cards/enforcado.jpg',meaning:'Sacrifício, nova perspectiva, pausa. Às vezes é preciso parar para ver diferente.'},
-      {id:14,title:'A Morte',suit:'Arcano Maior',img:'images/cards/morte.jpg',meaning:'Transformação, fim de ciclo, renovação. Não tema o fim, pois traz novos começos.'},
-      {id:15,title:'A Temperança',suit:'Arcano Maior',img:'images/cards/temperanca.jpg',meaning:'Equilíbrio, moderação, cura. Encontre harmonia entre extremos.'},
-      {id:16,title:'O Diabo',suit:'Arcano Maior',img:'images/cards/diabo.jpg',meaning:'Tentação, vícios, materialismo. Cuidado com limitações autoimpostas.'},
-      {id:17,title:'A Torre',suit:'Arcano Maior',img:'images/cards/torre.jpg',meaning:'Mudança brusca, revelação, libertação. Estruturas falsas serão derrubadas.'},
-      {id:18,title:'A Estrela',suit:'Arcano Maior',img:'images/cards/estrela.jpg',meaning:'Esperança, inspiração, fé. Conecte-se com seu propósito superior.'},
-      {id:19,title:'A Lua',suit:'Arcano Maior',img:'images/cards/lua.jpg',meaning:'Intuição, ilusão, subconsciente. Confie nos seus sonhos e instintos.'},
-      {id:20,title:'O Sol',suit:'Arcano Maior',img:'images/cards/sol.jpg',meaning:'Alegria, sucesso, vitalidade. Brilhe com confiança e otimismo.'},
-      {id:21,title:'O Julgamento',suit:'Arcano Maior',img:'images/cards/julgamento.jpg',meaning:'Renascimento, avaliação, chamado. Hora de responder ao seu propósito.'},
-      {id:22,title:'O Mundo',suit:'Arcano Maior',img:'images/cards/mundo.jpg',meaning:'Completude, realização, jornada concluída. Celebre suas conquistas.'},
-
-      // Paus (Fogo)
-      {id:23,title:'Ás de Paus',suit:'Paus',img:'images/cards/as_paus.jpg',meaning:'Novo início energético, inspiração. Ideal para iniciar projetos com entusiasmo.'},
-      {id:24,title:'Dois de Paus',suit:'Paus',img:'images/cards/dois_paus.jpg',meaning:'Planejamento, parcerias. Planeje o futuro mantendo opções abertas.'},
-      {id:25,title:'Três de Paus',suit:'Paus',img:'images/cards/tres_paus.jpg',meaning:'Progresso, expansão. Seus esforços começam a mostrar resultados.'},
-      {id:26,title:'Quatro de Paus',suit:'Paus',img:'images/cards/quatro_paus.jpg',meaning:'Celebração, harmonia. Momento de comemorar conquistas em comunidade.'},
-      {id:27,title:'Cinco de Paus',suit:'Paus',img:'images/cards/cinco_paus.jpg',meaning:'Conflito, competição. Desentendimentos podem surgir - busque diplomacia.'},
-      {id:28,title:'Seis de Paus',suit:'Paus',img:'images/cards/seis_paus.jpg',meaning:'Vitória, reconhecimento. Seu sucesso será notado e celebrado.'},
-      {id:29,title:'Sete de Paus',suit:'Paus',img:'images/cards/sete_paus.jpg',meaning:'Perseverança, defesa. Mantenha sua posição com determinação.'},
-      {id:30,title:'Oito de Paus',suit:'Paus',img:'images/cards/oito_paus.jpg',meaning:'Rapidez, movimento. Coisas acontecem rápido - esteja preparado.'},
-      {id:31,title:'Nove de Paus',suit:'Paus',img:'images/cards/nove_paus.jpg',meaning:'Resiliência, força. Você tem recursos internos para superar desafios.'},
-      {id:32,title:'Dez de Paus',suit:'Paus',img:'images/cards/dez_paus.jpg',meaning:'Carga, responsabilidade. Cuidado com excesso de obrigações.'},
-      {id:33,title:'Pajem de Paus',suit:'Paus',img:'images/cards/pajem_paus.jpg',meaning:'Entusiasmo, notícias. Boas novas chegando com energia juvenil.'},
-      {id:34,title:'Cavaleiro de Paus',suit:'Paus',img:'images/cards/cavaleiro_paus.jpg',meaning:'Ação, aventura. Momento de agir com paixão e coragem.'},
-      {id:35,title:'Rainha de Paus',suit:'Paus',img:'images/cards/rainha_paus.jpg',meaning:'Confiança, independência. Mulher forte e determinada influenciando positivamente.'},
-      {id:36,title:'Rei de Paus',suit:'Paus',img:'images/cards/rei_paus.jpg',meaning:'Liderança, visão. Homem inspirador que lidera com entusiasmo.'},
-
-      // Copas (Água)
-      {id:37,title:'Ás de Copas',suit:'Copas',img:'images/cards/as_copas.jpg',meaning:'Novo amor, felicidade emocional. O coração se abre para novas conexões.'},
-      {id:38,title:'Dois de Copas',suit:'Copas',img:'images/cards/dois_copas.jpg',meaning:'União, atração. Conexão profunda entre duas pessoas.'},
-      {id:39,title:'Três de Copas',suit:'Copas',img:'images/cards/tres_copas.jpg',meaning:'Celebração, amizade. Alegria compartilhada em grupo.'},
-      {id:40,title:'Quatro de Copas',suit:'Copas',img:'images/cards/quatro_copas.jpg',meaning:'Reflexão, apatia. Momento de avaliar o que realmente importa.'},
-      {id:41,title:'Cinco de Copas',suit:'Copas',img:'images/cards/cinco_copas.jpg',meaning:'Perda, luto. Foque no que ainda tem, não no que perdeu.'},
-      {id:42,title:'Seis de Copas',suit:'Copas',img:'images/cards/seis_copas.jpg',meaning:'Nostalgia, inocência. Conexões do passado trazem alegria.'},
-      {id:43,title:'Sete de Copas',suit:'Copas',img:'images/cards/sete_copas.jpg',meaning:'Escolhas, ilusão. Cuidado com fantasias - foque no realista.'},
-      {id:44,title:'Oito de Copas',suit:'Copas',img:'images/cards/oito_copas.jpg',meaning:'Partida, busca interior. Hora de seguir em busca de significado mais profundo.'},
-      {id:45,title:'Nove de Copas',suit:'Copas',img:'images/cards/nove_copas.jpg',meaning:'Satisfação, contentamento. Desejos realizados trazem felicidade.'},
-      {id:46,title:'Dez de Copas',suit:'Copas',img:'images/cards/dez_copas.jpg',meaning:'Felicidade familiar, harmonia. Amor e alegria no ambiente doméstico.'},
-      {id:47,title:'Pajem de Copas',suit:'Copas',img:'images/cards/pajem_copas.jpg',meaning:'Sensibilidade, afeto. Pessoa doce trazendo emoções positivas.'},
-      {id:48,title:'Cavaleiro de Copas',suit:'Copas',img:'images/cards/cavaleiro_copas.jpg',meaning:'Romance, idealismo. Convite para seguir o coração.'},
-      {id:49,title:'Rainha de Copas',suit:'Copas',img:'images/cards/rainha_copas.jpg',meaning:'Compaixão, intuição. Mulher amorosa que cura com sensibilidade.'},
-      {id:50,title:'Rei de Copas',suit:'Copas',img:'images/cards/rei_copas.jpg',meaning:'Equilíbrio emocional, sabedoria. Homem que lidera com o coração.'},
-
-      // Espadas (Ar)
-      {id:51,title:'Ás de Espadas',suit:'Espadas',img:'images/cards/as_espadas.jpg',meaning:'Clareza mental, verdade. Nova perspectiva traz entendimento.'},
-      {id:52,title:'Dois de Espadas',suit:'Espadas',img:'images/cards/dois_espadas.jpg',meaning:'Decisão difícil, equilíbrio. Escolha requer ponderação cuidadosa.'},
-      {id:53,title:'Três de Espadas',suit:'Espadas',img:'images/cards/tres_espadas.jpg',meaning:'Dor emocional, separação. Coração partido que precisa de cura.'},
-      {id:54,title:'Quatro de Espadas',suit:'Espadas',img:'images/cards/quatro_espadas.jpg',meaning:'Descanso, recuperação. Pausa necessária para restaurar energias.'},
-      {id:55,title:'Cinco de Espadas',suit:'Espadas',img:'images/cards/cinco_espadas.jpg',meaning:'Conflito, tensão. Vitória que pode trazer ressentimentos.'},
-      {id:56,title:'Seis de Espadas',suit:'Espadas',img:'images/cards/seis_espadas.jpg',meaning:'Transição, mudança. Movimento para águas mais calmas.'},
-      {id:57,title:'Sete de Espadas',suit:'Espadas',img:'images/cards/sete_espadas.jpg',meaning:'Estratégia, cautela. Cuidado com informações não totalmente verdadeiras.'},
-      {id:58,title:'Oito de Espadas',suit:'Espadas',img:'images/cards/oito_espadas.jpg',meaning:'Restrição, medo. Limitações são mais mentais que reais.'},
-      {id:59,title:'Nove de Espadas',suit:'Espadas',img:'images/cards/nove_espadas.jpg',meaning:'Ansiedade, preocupação. Medos noturnos que parecem maiores do que são.'},
-      {id:60,title:'Dez de Espadas',suit:'Espadas',img:'images/cards/dez_espadas.jpg',meaning:'Fim doloroso, rock bottom. O pior já passou - renovação começa.'},
-      {id:61,title:'Pajem de Espadas',suit:'Espadas',img:'images/cards/pajem_espadas.jpg',meaning:'Curiosidade, comunicação. Pessoa observadora trazendo novas ideias.'},
-      {id:62,title:'Cavaleiro de Espadas',suit:'Espadas',img:'images/cards/cavaleiro_espadas.jpg',meaning:'Ação intelectual, verdade. Agir com lógica e objetividade.'},
-      {id:63,title:'Rainha de Espadas',suit:'Espadas',img:'images/cards/rainha_espadas.jpg',meaning:'Clareza, independência. Mulher inteligente que fala a verdade.'},
-      {id:64,title:'Rei de Espadas',suit:'Espadas',img:'images/cards/rei_espadas.jpg',meaning:'Justiça, autoridade mental. Homem que decide com racionalidade.'},
-
-      // Ouros (Terra)
-      {id:65,title:'Ás de Ouros',suit:'Ouros',img:'images/cards/as_ouros.jpg',meaning:'Nova oportunidade material, prosperidade. Investimento promissor.'},
-      {id:66,title:'Dois de Ouros',suit:'Ouros',img:'images/cards/dois_ouros.jpg',meaning:'Equilíbrio financeiro, adaptação. Jogar com múltiplas opções.'},
-      {id:67,title:'Três de Ouros',suit:'Ouros',img:'images/cards/tres_ouros.jpg',meaning:'Colaboração, trabalho em equipe. Habilidades sendo reconhecidas.'},
-      {id:68,title:'Quatro de Ouros',suit:'Ouros',img:'images/cards/quatro_ouros.jpg',meaning:'Conservadorismo, segurança. Cuidado com excesso de controle.'},
-      {id:69,title:'Cinco de Ouros',suit:'Ouros',img:'images/cards/cinco_ouros.jpg',meaning:'Dificuldade material, isolamento. Tempo de escassez que vai passar.'},
-      {id:70,title:'Seis de Ouros',suit:'Ouros',img:'images/cards/seis_ouros.jpg',meaning:'Generosidade, compartilhar. Dar e receber em equilíbrio.'},
-      {id:71,title:'Sete de Ouros',suit:'Ouros',img:'images/cards/sete_ouros.jpg',meaning:'Paciência, investimento. Trabalho atual trará frutos futuros.'},
-      {id:72,title:'Oito de Ouros',suit:'Ouros',img:'images/cards/oito_ouros.jpg',meaning:'Dedicação, artesanato. Excelência através do trabalho árduo.'},
-      {id:73,title:'Nove de Ouros',suit:'Ouros',img:'images/cards/nove_ouros.jpg',meaning:'Autossuficiência, luxo. Conforto conquistado pelo próprio esforço.'},
-      {id:74,title:'Dez de Ouros',suit:'Ouros',img:'images/cards/dez_ouros.jpg',meaning:'Legado, riqueza familiar. Segurança e estabilidade duradouras.'},
-      {id:75,title:'Pajem de Ouros',suit:'Ouros',img:'images/cards/pajem_ouros.jpg',meaning:'Aprendizagem, estudo. Jovem dedicado ao crescimento prático.'},
-      {id:76,title:'Cavaleiro de Ouros',suit:'Ouros',img:'images/cards/cavaleiro_ouros.jpg',meaning:'Responsabilidade, método. Progresso lento mas seguro.'},
-      {id:77,title:'Rainha de Ouros',suit:'Ouros',img:'images/cards/rainha_ouros.jpg',meaning:'Praticalidade, abundância. Mulher que cuida dos recursos com sabedoria.'},
-      {id:78,title:'Rei de Ouros',suit:'Ouros',img:'images/cards/rei_ouros.jpg',meaning:'Prosperidade, estabilidade. Homem que constrói impérios materiais.'}
+      {id: "mago", title: "O Mago", img: "Cards-jpg/mago.jpg", desc: "Representa iniciativa, poder pessoal e novas oportunidades."},
+      {id: "sacerdotisa", title: "A Sacerdotisa", img: "Cards-jpg/02-AltaSacerdotisa.jpg", desc: "Simbologia da intuição, mistério e conhecimento oculto."},
+      {id: "imperatriz", title: "A Imperatriz", img: "Cards-jpg/03-AImperatriz.jpg", desc: "Energia da fertilidade, abundância e criatividade."},
+      {id: "imperador", title: "O Imperador", img: "Cards-jpg/04-OImperador.jpg", desc: "Representa estabilidade, autoridade e disciplina."},
+      {id: "papa", title: "O Papa", img: "Cards-jpg/05-OHierofante.jpg", desc: "Símbolo de tradição, espiritualidade e orientação."},
+      {id: "enamorados", title: "Os Enamorados", img: "Cards-jpg/06-OsAmantes.jpg", desc: "Carta de escolhas, relacionamentos e alinhamento de valores."},
+      // 👉 continue adicionando as demais cartas...
     ];
 
-    // seleciona elementos
     const sortearBtn = document.getElementById('sortearBtn');
     const resetBtn = document.getElementById('resetBtn');
-    const cardBack = document.getElementById('cardBack');
-    const cardFront = document.getElementById('cardFront');
-    const cardImage = document.getElementById('cardImage');
-    const cardTitle = document.getElementById('cardTitle');
-    const cardSuit = document.getElementById('cardSuit');
-    const frontFace = document.getElementById('frontFace');
-    const statusText = document.getElementById('statusText');
     const resultBox = document.getElementById('resultBox');
-    const meaningText = document.getElementById('meaningText');
-
-    // util: get string yyyy-mm-dd
-    function todayKey() {
-      const d = new Date();
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth()+1).padStart(2,'0');
-      const dd = String(d.getDate()).padStart(2,'0');
-      return `${yyyy}-${mm}-${dd}`;
-    }
-
-    // guarda a carta sorteada localStorage por data
-    const STORAGE_KEY = 'tarotDoDia_selected';
+    const cardImage = document.getElementById('cardImage');
+    const statusText = document.getElementById('status');
+    const descriptionText = document.getElementById('description');
 
     function getSaved() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if(!raw) return null;
-        const parsed = JSON.parse(raw);
-        if(parsed && parsed.date === todayKey()) return parsed.cardId;
-        return null;
-      } catch (e) {
-        console.error(e);
-        return null;
-      }
+      return localStorage.getItem('cartaHoje');
     }
-
-    function saveSelected(cardId) {
-      const payload = { date: todayKey(), cardId };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    function saveSelected(id) {
+      const today = new Date().toDateString();
+      localStorage.setItem('cartaHoje', id);
+      localStorage.setItem('dataCarta', today);
     }
-
     function clearSaved() {
-      localStorage.removeItem(STORAGE_KEY);
-      updateUIForNoSelection();
+      localStorage.removeItem('cartaHoje');
+      localStorage.removeItem('dataCarta');
+      resultBox.style.display = 'none';
+      statusText.textContent = '';
+      descriptionText.textContent = '';
     }
-
-    // atualiza UI quando não há sorteio
+    function showCardById(id) {
+      const c = deck.find(x => x.id === id);
+      if (!c) return;
+      cardImage.src = c.img;
+      cardImage.alt = c.title;
+      statusText.textContent = `Sua carta do dia é: ${c.title}`;
+      descriptionText.textContent = c.desc;
+      resultBox.style.display = 'block';
+    }
     function updateUIForNoSelection() {
-      // voltar para costas
-      cardFront.style.opacity = 0;
-      cardFront.classList.remove('flipped');
-      cardBack.classList.remove('flipped');
-      cardBack.style.opacity = 1;
-      statusText.textContent = 'Ainda não sorteou a carta de hoje.';
       resultBox.style.display = 'none';
     }
 
-    // mostra resultado salvo
-    function showCardById(cardId) {
-      const c = deck.find(x=>x.id===cardId);
-      if(!c) { updateUIForNoSelection(); return; }
-      // preenche front
-      cardImage.src = c.img;
-      cardImage.alt = c.title;
-      cardTitle.textContent = c.title;
-      cardSuit.textContent = c.suit;
-      meaningText.textContent = c.meaning;
-      // anima virada
-      cardBack.classList.add('flipped');
-      cardFront.classList.add('flipped');
-      cardFront.style.opacity = 1;
-      statusText.textContent = `Carta sorteada hoje: ${c.title}`;
-      resultBox.style.display = 'block';
-    }
-
-    // sorteio aleatório simples
-    function drawRandomCard() {
-      const idx = Math.floor(Math.random() * deck.length);
-      return deck[idx].id;
-    }
-
-    // anima flip com delay
-    function animateDraw(cardId) {
-      cardBack.style.transition = 'transform .9s cubic-bezier(.2,.9,.3,1)';
-      cardFront.style.transition = 'transform .9s cubic-bezier(.2,.9,.3,1), opacity .6s';
-      cardBack.classList.add('flipped');
-      setTimeout(() => {
-        showCardById(cardId);
-      }, 700);
-    }
-
-    sortearBtn.addEventListener('click', () => {
-      const existing = getSaved();
-      if(existing) {
-        showCardById(existing);
-        if(navigator.vibrate) navigator.vibrate(50);
+    // Evento sortear
+    sortearBtn.addEventListener('click', ()=>{
+      const saved = getSaved();
+      const today = new Date().toDateString();
+      if(saved && localStorage.getItem('dataCarta') === today){
+        showCardById(saved);
         return;
       }
-      const chosenId = drawRandomCard();
-      saveSelected(chosenId);
-      animateDraw(chosenId);
+      const random = deck[Math.floor(Math.random()*deck.length)];
+      saveSelected(random.id);
+      showCardById(random.id);
     });
 
-    resetBtn.addEventListener('click', () => {
-      if(confirm('Deseja realmente limpar o sorteio do dia?')) {
-        clearSaved();
-      }
+    // Evento reset
+    resetBtn.addEventListener('click', ()=>{
+      clearSaved();
     });
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const saved = getSaved();
-      if(saved) {
-        showCardById(saved);
-      } else {
-        updateUIForNoSelection();
-      }
-    });
- function showCardById(cardId) {
-  const c = deck.find(x=>x.id===cardId);
-  if(!c) { 
-    updateUIForNoSelection(); 
-    return; 
-  }
-  
-  // Preenche front
-  cardImage.src = c.img;
-  cardImage.alt = c.title;
-  cardTitle.textContent = c.title;
-  cardSuit.textContent = c.suit;
-  meaningText.textContent = c.meaning;
-  
-  // Adiciona tratamento de erro para imagem
-  cardImage.onerror = function() {
-    console.error('Erro ao carregar imagem:', c.img);
-    cardImage.src = 'cartas/CardBacks.jpg'; // imagem de fallback
-  };
-  
-  // Anima virada
-  cardBack.classList.add('flipped');
-  cardFront.classList.add('flipped');
-  cardFront.style.opacity = 1;
-  statusText.textContent = `Carta sorteada hoje: ${c.title}`;
-  resultBox.style.display = 'block';
-} </script>
+    // Inicialização
+    const saved = getSaved();
+    const today = new Date().toDateString();
+    if(saved && localStorage.getItem('dataCarta') === today){
+      showCardById(saved);
+    } else {
+      updateUIForNoSelection();
+    }
+  </script>
 </body>
 </html>
-
