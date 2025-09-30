@@ -316,6 +316,33 @@
         updateUIForNoSelection();
       }
     });
-  </script>
+ function showCardById(cardId) {
+  const c = deck.find(x=>x.id===cardId);
+  if(!c) { 
+    updateUIForNoSelection(); 
+    return; 
+  }
+  
+  // Preenche front
+  cardImage.src = c.img;
+  cardImage.alt = c.title;
+  cardTitle.textContent = c.title;
+  cardSuit.textContent = c.suit;
+  meaningText.textContent = c.meaning;
+  
+  // Adiciona tratamento de erro para imagem
+  cardImage.onerror = function() {
+    console.error('Erro ao carregar imagem:', c.img);
+    cardImage.src = 'cartas/CardBacks.jpg'; // imagem de fallback
+  };
+  
+  // Anima virada
+  cardBack.classList.add('flipped');
+  cardFront.classList.add('flipped');
+  cardFront.style.opacity = 1;
+  statusText.textContent = `Carta sorteada hoje: ${c.title}`;
+  resultBox.style.display = 'block';
+} </script>
 </body>
 </html>
+
